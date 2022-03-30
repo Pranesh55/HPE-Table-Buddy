@@ -1,4 +1,10 @@
 import argparse 
+import requests as req
+
+#URLS
+TIMETABLE_GET = 'http://127.0.0.1:5000/getTimeTable'
+
+
 
 parser = argparse.ArgumentParser(add_help=False,description="thid ihbjkb")
 
@@ -25,8 +31,8 @@ class CLI():
             ('student','standard','section'):self.student_std_section,
             ('student','standard'):self.student_std,
             ('student','help'):self.student_help,
-            ('teacher','standard','section'):self.teacher_std_section,
-            ('teacher','standard'):self.teacher_std,
+           
+            ('teacher','subject','standard'):self.teacher_std,
             ('teacher','help'):self.teacher_help,
             ('admin','generate'):self.admin_generate,
             ('admin','standard','section'):self.admin_std_section,
@@ -51,10 +57,18 @@ class CLI():
         print("Student: {}".format(self.args.user))
         print("Class: {}".format(self.args.standard))
         print("Section: {}".format(self.args.section))
-    
+       
+        res=req.get(TIMETABLE_GET,params={'std':self.args.standard,'section':self.args.section})
+        data=(res.json()) 
+
+        
     def student_std(self):
         print("Student: {}".format(self.args.user))
         print("Class: {}".format(self.args.standard))
+
+        res=req.get(TIMETABLE_GET,params={'std':self.args.standard})
+        data=(res.json()) 
+        print(data)
 
 
     def student_help(self):
@@ -66,14 +80,14 @@ class CLI():
         print("[section] - Either 'A' or 'B'")
         print("Note: The - - section flag is optional. If [section] was not provided, the time tables for both the classes are displayed.")
     
-    def teacher_std_section(self):
-        print("Teacher: {}".format(self.args.user))
-        print("Class: {}".format(self.args.standard))
-        print("Section: {}".format(self.args.section))
+ 
     
     def teacher_std(self):
         print("Teacher: {}".format(self.args.user))
         print("Class: {}".format(self.args.standard))
+        res=req.get(TIMETABLE_GET,params={'std':self.args.standard,'subject':self.args.subject})
+        data=res.json()
+        print(data)
     
     def teacher_help(self):
         print("Teacher: {}".format(self.args.user))
