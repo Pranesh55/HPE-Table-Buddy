@@ -60,6 +60,7 @@ class CLI():
        
         res=req.get(TIMETABLE_GET,params={'std':self.args.standard,'section':self.args.section})
         data=(res.json()) 
+        print(data)
 
         
     def student_std(self):
