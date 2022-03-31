@@ -1,5 +1,5 @@
 import sys
-from collections import defaultdict
+from __future__ import annotations
 
 from db import DBHelper
 from flask import Flask, jsonify, request
@@ -41,7 +41,6 @@ def table():
     if std and subject:
         data = {}
         result = db_helper.getTimeTableStd(std)
-        print(result)
         converted = convertToTeacherTimeTable(result, subject)
         data["message"] = converted
         return jsonify(data)
@@ -57,17 +56,6 @@ def table():
         return jsonify(data)
 
     return "INVLID!!!!"
-
-
-def convertToTeacherTimeTable(timetable, subject):
-    columns = ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6"]
-    final = defaultdict(lambda: ["-"] * 6)
-    for row in timetable:
-        for col in columns:
-            if row[col] == subject:
-                final[row["day"]][columns.index(col)] = f"{row['std']}-{row['section']}"
-    print(list(final.values()))
-    return list(final.values())
 
 
 if __name__ == "__main__":

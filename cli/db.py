@@ -2,6 +2,10 @@ import sqlite3
 from inspect import classify_class_attrs
 from typing import Tuple
 import roman
+import logging
+
+LOG = logging.getLogger("table_buddy.cli.db")
+
 
 class Singleton(type):
     _instances = {}
@@ -14,7 +18,7 @@ class Singleton(type):
 
 class DBHelper(metaclass=Singleton):
     def __init__(self) -> None:
-        self.conn = sqlite3.connect("database.db",check_same_thread=False)
+        self.conn = sqlite3.connect("database.db", check_same_thread=False)
         self.cursor = self.conn.cursor()
         self.cursor.execute(
             """
@@ -37,6 +41,7 @@ class DBHelper(metaclass=Singleton):
         tab = cur.execute("select * from TimeTable where std=? and section=?", (std, section))
         resultTimeTable = []
         for t in tab:
+            LOG.debug(t)
             data = {}
             data["std"] = t[0]
             data["section"] = t[1]
@@ -55,7 +60,6 @@ class DBHelper(metaclass=Singleton):
         tab = cur.execute("select * from TimeTable where std=?", (std,))
         resultTimeTable = []
         for t in tab:
-            print(t)
             data = {}
             data["std"] = t[0]
             data["section"] = t[1]
