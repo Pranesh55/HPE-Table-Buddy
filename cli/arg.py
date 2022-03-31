@@ -11,7 +11,7 @@ sys.path.append("..")
 from timetable_generator.backtrack import generate as timetable_generator
 
 logging.basicConfig(
-    level="DEBUG",
+    level="INFO",
     format="%(message)s",
     datefmt="[%X]",
     handlers=[RichHandler(rich_tracebacks=True)],
@@ -110,14 +110,27 @@ class CLI:
         self.admin_std()
 
     def student_help(self):
-        print("Student: {}".format(self.args.user))
-        print("Usage:")
-        print("student  [standard]   (or)")
-        print("student  [standard]  - - section [section]")
-        print("[standard] - Specify class in Roman Numerals ranging from I to X.")
-        print("[section] - Either 'A' or 'B'")
-        print(
-            "Note: The - - section flag is optional. If [section] was not provided, the time tables for both the classes are displayed."
+        print("""
+        
+                COMMAND 1:
+
+        student: To login as an student, view the timetable for both sections of the given class if section is not 
+                provided and view the timetable for the specified class and section if the section is provided.
+
+        tablebuddy student  --help
+                Displays the usage of the command
+
+        tablebuddy student --standard [standard] 
+                Displays timetable for both sections of the specified [standard].
+
+                [standard] - Specify class in Roman Numerals ranging from I to X.
+
+        tablebuddy student --standard [standard] --section [section]
+                Displays the timetable of specified [standard] and [section] .
+
+                [standard] - Specify class in Roman Numerals ranging from I to X.
+                [section] - Either ‘A’ or ‘B’
+                """
         )
 
     def teacher_sub_std(self):
@@ -132,14 +145,23 @@ class CLI:
         print(tabulate(table, headers=header_mapper.values(), tablefmt="fancy_grid"))
 
     def teacher_help(self):
-        print("Teacher: {}".format(self.args.user))
-        print("Usage:")
-        print("teacher  [standard]   (or)")
-        print("teacher  [standard]  - - section [section]")
-        print("[standard] - Specify class in Roman Numerals ranging from I to X.")
-        print("[section] - Either 'A' or 'B'")
-        print(
-            "Note: The - - section flag is optional. If [section] was not provided, the time tables for both the classes are displayed."
+        print("""
+        COMMAND 2:
+
+        teacher: To login as a teacher,to view their timetable by entering the specified subject and standard.
+
+        tablebuddy teacher --help
+                  Displays the usage of the command.
+
+        tablebuddy teacher --subject [subject] --standard [standard]
+                  Displays the timetable of specified [subject] and [standard].
+
+                  [subject] - specify the subject handled by the teacher
+                  [standard] - specify class in Roman Numerals ranging from I to X.
+        
+        Note: subject and standard flags require appropriate values for the timetable to be displayed.
+
+        """
         )
 
     def admin_generate(self):
@@ -182,28 +204,26 @@ class CLI:
         print("""
         COMMAND 3:
 
-admin: To login as an admin, generate the timetable for all classes, view the time tables of specific classes and sections.
+        admin: To login as an admin, generate the timetable for all classes, view the time tables of specific classes and sections.
 
-Usage:
+        tablebuddy admin  --help
+                Displays the usage of the command
 
-tablebuddy admin  - -help
-		Displays the usage of the command
+        tablebuddy admin --generate
+                Generates timetables for all the classes at once.
 
-tablebuddy admin - - generate
+                Note: value for generate flag is not required.
 
-Generates timetables for all the classes at once.
+        tablebuddy admin --standard [standard] --section [section]
+                Displays the timetable of specified [standard] and [section] .
 
-tablebuddy admin [standard] [section]
+                [standard] - Specify class in Roman Numerals ranging from I to X.
+                [section] - Either ‘A’ or ‘B’
 
-	Displays the timetable of specified [standard] and [section] .
+        tablebuddy admin --standard [standard]
+                Displays the timetable for both sections of the specified [standard].
 
-[standard] - Specify class in Roman Numerals ranging from I to X.
-
-[section] - Either ‘A’ or ‘B’
-
-tablebuddy admin [standard]
-
-[standard] - Specify class in Roman Numerals ranging from I to X.
+                [standard] - Specify class in Roman Numerals ranging from I to X.
 
 
         """)
