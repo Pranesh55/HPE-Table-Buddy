@@ -44,8 +44,11 @@ def getTimeTableStd(std):
     return resultTimeTable
     
 
-def generate():
+def generateDB(timetable_rows:list):
     truncateTable()
+    for row in timetable_rows:
+        insertInto(row)
+        
     return
 
 def truncateTable():
@@ -55,12 +58,11 @@ def truncateTable():
     connection.commit()
     return 
 
-def insertInTo(list):
+def insertInto(timetable_row:tuple):
     connection=getConn()
     cur=connection.cursor()
-    cur.execute("insert into TimeTable values(?,?,?,?,?,?,?,?,?)",tuple(list))
+    cur.execute("insert into TimeTable values(?,?,?,?,?,?,?,?,?)",timetable_row)
     connection.commit()
-    print(list)
     return
 
 
