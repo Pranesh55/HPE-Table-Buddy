@@ -35,46 +35,6 @@ header_mapper = {
 db_helper = DBHelper()
 
 
-parser = argparse.ArgumentParser(add_help=False)
-
-# ArgParse Arguments
-parser.add_argument(
-    "--help", help="Help for the particular command", action="store_true")
-parser.add_argument(
-    "user", help="To login as a student and view the timetable for the given class and section."
-)
-parser.add_argument(
-    "--generate", help="Generate timetable for all classes at once.", action="store_true"
-)
-parser.add_argument(
-    "--standard", "--std", help="Specify class in Roman Numerals ranging from I to X."
-)
-parser.add_argument("--section", "--sec", help='Either "A" or "B".')
-parser.add_argument(
-    "--subject", help="The specific subject for which the time table is about to be viewed."
-)
-
-
-args = parser.parse_args()
-LOG.debug("Arguments passed %s" % args.__dict__)
-
-# Utils
-
-
-def convertToTeacherTimeTable(timetable, subject):
-    """Convert the given timetable for the teacher's perspective."""
-    LOG.debug(timetable)
-    columns = ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6"]
-    final = [["-"] * 6 for _ in DAYS]
-    for row in timetable:
-        for col in columns:
-            if row[col] == subject:
-                final[DAYS.index(row["day"])][int(col[-1]) -
-                                              1] = f"{row['std']}-{row['section']}"
-    LOG.debug("Timetable\n %s" % final)
-    return final
-
-
 class CLI:
     def __init__(self, args):
         self.args = args
@@ -110,11 +70,9 @@ class CLI:
         self.admin_std()
 
     def student_help(self):
-        print("""
+        """
         
-                COMMAND 1:
-
-        student: To login as an student, view the timetable for both sections of the given class if section is not 
+        STUDENT: To login as an student, view the timetable for both sections of the given class if section is not 
                 provided and view the timetable for the specified class and section if the section is provided.
 
         tablebuddy student  --help
@@ -131,7 +89,7 @@ class CLI:
                 [standard] - Specify class in Roman Numerals ranging from I to X.
                 [section] - Either ‘A’ or ‘B’
                 """
-        )
+        print(self.student_help.__doc__)
 
     def teacher_sub_std(self):
         LOG.debug(self.args)
@@ -145,10 +103,8 @@ class CLI:
         print(tabulate(table, headers=header_mapper.values(), tablefmt="fancy_grid"))
 
     def teacher_help(self):
-        print("""
-        COMMAND 2:
-
-        teacher: To login as a teacher,to view their timetable by entering the specified subject and standard.
+        """
+        TEACHER: To login as a teacher,to view their timetable by entering the specified subject and standard.
 
         tablebuddy teacher --help
                   Displays the usage of the command.
@@ -162,7 +118,7 @@ class CLI:
         Note: subject and standard flags require appropriate values for the timetable to be displayed.
 
         """
-        )
+        print(self.teacher_help.__doc__)
 
     def admin_generate(self):
         """Generating admin timetable information"""
@@ -201,10 +157,8 @@ class CLI:
         # converted = convertToTeacherTimeTable(result, self.args.subject)
 
     def admin_help(self):
-        print("""
-        COMMAND 3:
-
-        admin: To login as an admin, generate the timetable for all classes, view the time tables of specific classes and sections.
+        """
+        ADMIN: To login as an admin, generate the timetable for all classes, view the time tables of specific classes and sections.
 
         tablebuddy admin  --help
                 Displays the usage of the command
@@ -226,7 +180,58 @@ class CLI:
                 [standard] - Specify class in Roman Numerals ranging from I to X.
 
 
-        """)
+        """
+        print(self.admin_help.__doc__)
+
+
+class ArgumentParser(argparse.ArgumentParser):    
+    def error(self, message):
+        if message.startswith("the following arguments are required"): 
+            print(CLI.student_help.__doc__,CLI.teacher_help.__doc__,CLI.admin_help.__doc__,sep="\n<"+"-"*100+">\n")
+        else:
+            print("error : "+message +"\n")
+            self.print_help()
+        sys.exit(2)
+
+parser = ArgumentParser(add_help=False)
+
+# ArgParse Arguments
+parser.add_argument(
+    "--help","-h", help="Help for the particular command", action="store_true")
+parser.add_argument(
+    "user", help="To login as a student and view the timetable for the given class and section."
+)
+parser.add_argument(
+    "--generate", help="Generate timetable for all classes at once.", action="store_true"
+)
+parser.add_argument(
+    "--standard", "--std", help="Specify class in Roman Numerals ranging from I to X."
+)
+parser.add_argument("--section", "--sec", help='Either "A" or "B".')
+parser.add_argument(
+    "--subject","--sub", help="The specific subject for which the time table is about to be viewed."
+)
+
+
+args = parser.parse_args()
+LOG.debug("Arguments passed %s" % args.__dict__)
+
+# Utils
+
+
+def convertToTeacherTimeTable(timetable, subject):
+    """Convert the given timetable for the teacher's perspective."""
+    LOG.debug(timetable)
+    columns = ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6"]
+    final = [["-"] * 6 for _ in DAYS]
+    for row in timetable:
+        for col in columns:
+            if row[col] == subject:
+                final[DAYS.index(row["day"])][int(col[-1]) -
+                                              1] = f"{row['std']}-{row['section']}"
+    LOG.debug("Timetable\n %s" % final)
+    return final
+
 
 
 if __name__ == "__main__":
