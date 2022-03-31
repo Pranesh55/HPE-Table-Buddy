@@ -15,7 +15,8 @@ class InvalidArgTest(unittest.TestCase):
         result = subprocess.check_output(["tablebuddy", "teacher", "--generate"], shell=True)
         self.assertEqual(result, b"Invalid arguments\r\n")
 
-    def student_std_sec(self):
+    def test_student_std_sec(self):
         result = subprocess.check_output(["tablebuddy", "student", "--standard", "X","--sec","C"], shell=True)
-        print(result)
+        if not result.startswith(b"Class:"): 
+            raise AssertionError("Not valid output")
          
