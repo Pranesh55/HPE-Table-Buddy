@@ -69,23 +69,22 @@ class CLI:
 
     def student_help(self):
         """
+        student - To login as a student and view the timetable for the given class and section.
 
-        STUDENT: To login as an student, view the timetable for both sections of the given class if section is not
-                provided and view the timetable for the specified class and section if the section is provided.
+        Usage:
 
-        tablebuddy student  --help
-                Displays the usage of the command
+        tablebuddy student  - -help
+		    Displays the usage of the command
 
-        tablebuddy student --standard [standard]
-                Displays timetable for both sections of the specified [standard].
+        tablebuddy student  <standard> <section>
+			
+        standard - Specify class in Roman Numerals ranging from I to X.
 
-                [standard] - Specify class in Roman Numerals ranging from I to X.
+        section - Either 'A' or 'B'
 
-        tablebuddy student --standard [standard] --section [section]
-                Displays the timetable of specified [standard] and [section] .
+        Note: 
+            If both `standard` and `section` were not provided the help for `student` command will be executed.
 
-                [standard] - Specify class in Roman Numerals ranging from I to X.
-                [section] - Either 'A' or 'B'
         """
         print(self.student_help.__doc__)
 
@@ -102,20 +101,24 @@ class CLI:
 
     def teacher_help(self):
         """
-        TEACHER: To login as a teacher,to view their timetable by entering the specified subject and standard.
+        teacher- To login as a teacher and view the timetable for the given subject, class and section.
 
-        tablebuddy teacher --help
-                  Displays the usage of the command.
+        Usage:
 
-        tablebuddy teacher --subject [subject] --standard [standard]
-                  Displays the timetable of specified [subject] and [standard].
+        tablebuddy teacher  - -help
+             Displays the usage of the command
 
-                  [subject] - specify the subject handled by the teacher
-                  [standard] - specify class in Roman Numerals ranging from I to X.
+        tablebuddy teacher <standard> <subject_name> 
+	
+        subject_name - The specific subject for which the time table is about to be viewed.
 
-        Note: subject and standard flags require appropriate values for the timetable to be displayed.
+        standard - Specify class in Roman Numerals ranging from I to X.
+
+        Note: 
+            If both `subject_name` and `standard` were not provided the help for `teacher` command will be executed.
 
         """
+
         print(self.teacher_help.__doc__)
 
     def admin_generate(self):
@@ -154,27 +157,31 @@ class CLI:
 
     def admin_help(self):
         """
-        ADMIN: To login as an admin, generate the timetable for all classes, view the time tables of specific classes and sections.
+        admin: To login as an admin, generate the timetable for all classes, view the time tables of specific classes and sections.
 
-        tablebuddy admin  --help
-                Displays the usage of the command
+        Usage:
 
-        tablebuddy admin --generate
-                Generates timetables for all the classes at once.
+        tablebuddy admin  - -help
+            Displays the usage of the command
 
-                Note: value for generate flag is not required.
+        tablebuddy admin - - generate
+            Generates timetables for all the classes at once.
 
-        tablebuddy admin --standard [standard] --section [section]
-                Displays the timetable of specified [standard] and [section] .
+        tablebuddy admin - - standard [standard]  - - section [section]
+            Displays the timetable of specified [standard] and [section] .
 
-                [standard] - Specify class in Roman Numerals ranging from I to X.
-                [section] - Either ‘A’ or ‘B’
+        [standard] - Specify class in Roman Numerals ranging from I to X.
 
-        tablebuddy admin --standard [standard]
-                Displays the timetable for both sections of the specified [standard].
+        [section] - Either 'A' or 'B'
 
-                [standard] - Specify class in Roman Numerals ranging from I to X.
+        tablebuddy admin - - standard [standard]
 
+        [standard] - Specify class in Roman Numerals ranging from I to X.
+
+        Note: 
+            Displays the timetable of both the sections when [section] is not provided. 
+            Displays the timetable for a particular section when both [standard] and [section] was provided.
+            If just `tablebuddy admin` was given , the help for `admin` command will be executed.
 
         """
         print(self.admin_help.__doc__)
@@ -196,25 +203,35 @@ class ArgumentParser(argparse.ArgumentParser):
 
 
 parser = ArgumentParser(add_help=False)
-
 # ArgParse Arguments
-parser.add_argument("--help", "-h", help="Help for the particular command", action="store_true")
 parser.add_argument(
-    "user", help="To login as a student and view the timetable for the given class and section."
-)
-parser.add_argument(
-    "--generate", help="Generate timetable for all classes at once.", action="store_true"
-)
-parser.add_argument(
-    "--standard", "--std", help="Specify class in Roman Numerals ranging from I to X."
-)
-parser.add_argument("--section", "--sec", help='Either "A" or "B".')
-parser.add_argument(
-    "--subject",
-    "--sub",
-    help="The specific subject for which the time table is about to be viewed.",
+    "user", help=""
 )
 
+if "--help" in sys.argv:
+    parser.add_argument("--help", "-h", help="Help for the particular command", action="store_true")
+elif "student" == sys.argv[1]:
+    parser.add_argument(
+    "standard", help="Specify class in Roman Numerals ranging from I to X."
+    )
+    parser.add_argument("section", help='Either "A" or "B".')
+
+elif "teacher" == sys.argv[1]:
+    parser.add_argument(
+        "standard", help="Specify class in Roman Numerals ranging from I to X."
+    )
+    parser.add_argument(
+    "subject",
+    help="The specific subject for which the time table is about to be viewed.",
+    )
+else:
+    parser.add_argument(
+        "--generate", help="Generate timetable for all classes at once.", action="store_true"
+    )
+    parser.add_argument(
+            "--standard","--std", help="Specify class in Roman Numerals ranging from I to X."
+        )
+    parser.add_argument("--section", "--sec",help='Either "A" or "B".')
 
 args = parser.parse_args()
 LOG.debug("Arguments passed %s" % args.__dict__)
