@@ -226,11 +226,13 @@ def convertToTeacherTimeTable(timetable, subject):
     """Convert the given timetable for the teacher's perspective."""
     LOG.debug(timetable)
     columns = ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6"]
-    final = [["-"] * 6 for _ in DAYS]
-    for row in timetable:
+    final = [["-"] * 7 for _ in DAYS]
+    for index, row in enumerate(timetable):
+        print(index)
+        final[DAYS.index(row["day"])][0] = row["day"]
         for col in columns:
             if row[col] == subject:
-                final[DAYS.index(row["day"])][int(col[-1]) - 1] = f"{row['std']}-{row['section']}"
+                final[DAYS.index(row["day"])][int(col[-1])] = f"{row['std']}-{row['section']}"
     LOG.debug("Timetable\n %s" % final)
     return final
 
