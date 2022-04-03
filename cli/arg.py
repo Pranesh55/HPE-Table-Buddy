@@ -44,7 +44,6 @@ class CLI:
 
         fcd = {
             ("student", "standard", "section"): self.student_std_section,
-            ("student", "standard"): self.student_std,
             ("student", "help"): self.student_help,
             ("teacher", "subject", "standard"): self.teacher_sub_std,
             ("teacher", "help"): self.teacher_help,
@@ -53,8 +52,7 @@ class CLI:
             ("admin", "standard"): self.admin_std,
             ("admin", "help"): self.admin_help,
         }
-        actual_args = sorted(
-            i for i, j in args.__dict__.items() if j and i != "user")
+        actual_args = sorted(i for i, j in args.__dict__.items() if j and i != "user")
         for item, func in fcd.items():
             if self.args.user == item[0]:
                 if sorted(item[1:]) == actual_args:
@@ -71,14 +69,14 @@ class CLI:
 
     def student_help(self):
         """
-        
-        STUDENT: To login as an student, view the timetable for both sections of the given class if section is not 
+
+        STUDENT: To login as an student, view the timetable for both sections of the given class if section is not
                 provided and view the timetable for the specified class and section if the section is provided.
 
         tablebuddy student  --help
                 Displays the usage of the command
 
-        tablebuddy student --standard [standard] 
+        tablebuddy student --standard [standard]
                 Displays timetable for both sections of the specified [standard].
 
                 [standard] - Specify class in Roman Numerals ranging from I to X.
@@ -87,8 +85,8 @@ class CLI:
                 Displays the timetable of specified [standard] and [section] .
 
                 [standard] - Specify class in Roman Numerals ranging from I to X.
-                [section] - Either ‘A’ or ‘B’
-                """
+                [section] - Either 'A' or 'B'
+        """
         print(self.student_help.__doc__)
 
     def teacher_sub_std(self):
@@ -100,7 +98,7 @@ class CLI:
             print("No timetable found for the given subject")
             return
         print("Subject:", self.args.subject)
-        print(tabulate(table, headers=header_mapper.values(), tablefmt="fancy_grid"))
+        print(tabulate(table, headers=tuple(header_mapper.values()), tablefmt="fancy_grid"))
 
     def teacher_help(self):
         """
@@ -114,7 +112,7 @@ class CLI:
 
                   [subject] - specify the subject handled by the teacher
                   [standard] - specify class in Roman Numerals ranging from I to X.
-        
+
         Note: subject and standard flags require appropriate values for the timetable to be displayed.
 
         """
@@ -127,8 +125,7 @@ class CLI:
         for class_, timetable in final_timetable.items():
             for day_index, row in enumerate(timetable):
                 timetable_rows.append(
-                    (*class_, DAYS[day_index], *
-                     [period.subject.name for period in row])
+                    (*class_, DAYS[day_index], *[period.subject.name for period in row])
                 )
         db_helper.generateDB(timetable_rows)
         LOG.info("Sucessfully generated timetable")
@@ -137,7 +134,7 @@ class CLI:
         result = db_helper.getTimeTable(self.args.standard, self.args.section)
         table = [[row[i] for i in header_mapper.keys()] for row in result]
         print(f"Class: {self.args.standard}-{self.args.section}")
-        print(tabulate(table, headers=header_mapper.values(), tablefmt="fancy_grid"))
+        print(tabulate(table, headers=tuple(header_mapper.values()), tablefmt="fancy_grid"))
 
     def admin_std(self):
         result = db_helper.getTimeTableStd(self.args.standard)
@@ -149,11 +146,10 @@ class CLI:
             else:
                 table_b.append([row[i] for i in header_mapper.keys()])
 
-        print(f"Class: {self.args.standard}-A")
-        print(tabulate(table_a, headers=header_mapper.values(), tablefmt="fancy_grid"))
-        print()
-        print(f"Class: {self.args.standard}-B")
-        print(tabulate(table_b, headers=header_mapper.values(), tablefmt="fancy_grid"))
+        for key, value in {"A": table_a, "B": table_b}.items():
+            print(f"Class: {self.args.standard}-{key}")
+            print(tabulate(value, headers=tuple(header_mapper.values()), tablefmt="fancy_grid"))
+            print()
         # converted = convertToTeacherTimeTable(result, self.args.subject)
 
     def admin_help(self):
@@ -184,20 +180,25 @@ class CLI:
         print(self.admin_help.__doc__)
 
 
-class ArgumentParser(argparse.ArgumentParser):    
+class ArgumentParser(argparse.ArgumentParser):
     def error(self, message):
-        if message.startswith("the following arguments are required"): 
-            print(CLI.student_help.__doc__,CLI.teacher_help.__doc__,CLI.admin_help.__doc__,sep="\n<"+"-"*100+">\n")
+        if message.startswith("the following arguments are required"):
+            print(
+                CLI.student_help.__doc__,
+                CLI.teacher_help.__doc__,
+                CLI.admin_help.__doc__,
+                sep="\n<" + "-" * 100 + ">\n",
+            )
         else:
-            print("error : "+message +"\n")
+            print("error : " + message + "\n")
             self.print_help()
         sys.exit(2)
+
 
 parser = ArgumentParser(add_help=False)
 
 # ArgParse Arguments
-parser.add_argument(
-    "--help","-h", help="Help for the particular command", action="store_true")
+parser.add_argument("--help", "-h", help="Help for the particular command", action="store_true")
 parser.add_argument(
     "user", help="To login as a student and view the timetable for the given class and section."
 )
@@ -209,7 +210,9 @@ parser.add_argument(
 )
 parser.add_argument("--section", "--sec", help='Either "A" or "B".')
 parser.add_argument(
-    "--subject","--sub", help="The specific subject for which the time table is about to be viewed."
+    "--subject",
+    "--sub",
+    help="The specific subject for which the time table is about to be viewed.",
 )
 
 
@@ -227,11 +230,9 @@ def convertToTeacherTimeTable(timetable, subject):
     for row in timetable:
         for col in columns:
             if row[col] == subject:
-                final[DAYS.index(row["day"])][int(col[-1]) -
-                                              1] = f"{row['std']}-{row['section']}"
+                final[DAYS.index(row["day"])][int(col[-1]) - 1] = f"{row['std']}-{row['section']}"
     LOG.debug("Timetable\n %s" % final)
     return final
-
 
 
 if __name__ == "__main__":
