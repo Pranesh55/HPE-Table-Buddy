@@ -206,6 +206,8 @@ class CLI:
     def roman_to_integer(roman):
         romans=['I','II','III','IV','V','VI','VII','VIII','IX','X']
         return dict(zip(romans, range(1,11))).get(roman)
+    
+    
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -223,13 +225,26 @@ class ArgumentParser(argparse.ArgumentParser):
             print("error : " + message + "\n")
             self.print_help()
         sys.exit(2)
+def print_document():
+    print(
+        CLI.student_help.__doc__,
+        CLI.teacher_help.__doc__,
+        CLI.admin_help.__doc__,
+        sep="\n<" + "-" * 100 + ">\n",
+    )
 
 
 parser = ArgumentParser(add_help=False)
 # ArgParse Arguments
-parser.add_argument(
-    "user", help=""
-)
+
+if len(sys.argv) == 1:
+    print_document()
+    sys.exit(2)
+else:
+    parser.add_argument(
+        "user", help=""
+    )
+
 
 if "--help" in sys.argv:
     parser.add_argument("--help", "-h", help="Help for the particular command", action="store_true")
