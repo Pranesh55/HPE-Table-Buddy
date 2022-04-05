@@ -31,6 +31,18 @@ header_mapper = {
     "p_5": "Period 5",
     "p_6": "Period 6",
 }
+primary_subs_raw = ["English", "Language", "Maths", "Science", "Social Science"]
+secondary_subs_raw = [
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Algebra",
+    "Trignometry",
+    "Geometry",
+    "History",
+    "Civics",
+    "Geography"
+]
 
 db_helper = DBHelper()
 
@@ -60,6 +72,9 @@ class CLI:
                     break
         else:
             print("Invalid arguments")
+            if args.user == "admin":
+                self.admin_help()
+            
 
     def student_std_section(self):
         self.admin_std_section()
@@ -73,49 +88,59 @@ class CLI:
 
         Usage:
 
-        tablebuddy student  - -help
-		    Displays the usage of the command
+            tablebuddy student  - -help
+                    
+            tablebuddy student  STANDARD  SECTION
 
-        tablebuddy student  <standard> <section>
-			
-        standard - Specify class in Roman Numerals ranging from I to X.
+        Positional arguments:
+                
+            STANDARD - Specify class in Roman Numerals ranging from I to X.
 
-        section - Either 'A' or 'B'
+            SECTION - Either 'A' or 'B'
 
-        Note: 
-            If both `standard` and `section` were not provided the help for `student` command will be executed.
+        Optional arguments
+            - -help         - Displays the usage of the command
 
         """
         print(self.student_help.__doc__)
 
     def teacher_sub_std(self):
+        subject=self.args.subject.capitalize()
+        standard=self.args.standard
         LOG.debug(self.args)
         result = db_helper.getTimeTableStd(self.args.standard)
         LOG.debug(result)
-        table = convertToTeacherTimeTable(result, self.args.subject)
-        if all(j == "-" for i in table for j in i):
-            print("No timetable found for the given subject")
+        table = convertToTeacherTimeTable(result, self.args.subject.capitalize())
+        # if all(j == "-" for i in table for j in i):
+        if not (subject in primary_subs_raw) and not (subject in secondary_subs_raw):
+            romans=['I','II','III','IV','V','VI','VII','VIII','IX','X']
+            roman=dict(zip(romans, range(1,11)))[standard]
+            if roman >=1 and roman<=5:
+                print("No timetable found for {}. Try giving any of the subjects from below ".format(self.args.subject),primary_subs_raw)
+            else:
+                print("No timetable found for {}. Try giving any of the subjects from below ".format(self.args.subject),secondary_subs_raw)
             return
-        print("Subject:", self.args.subject)
+        print("Subject:", subject)
         print(tabulate(table, headers=tuple(header_mapper.values()), tablefmt="fancy_grid"))
 
     def teacher_help(self):
         """
-        teacher- To login as a teacher and view the timetable for the given subject, class and section.
+        teacher- To login as a teacher and view the timetable for the given subject and standard.
 
         Usage:
 
-        tablebuddy teacher  - -help
-             Displays the usage of the command
+            tablebuddy teacher  - -help
+                    
+            tablebuddy teacher STANDARD  SUBJECT_NAME 
+            
+        Positional arguments:
 
-        tablebuddy teacher <standard> <subject_name> 
-	
-        subject_name - The specific subject for which the time table is about to be viewed.
+            SUBJECT_NAME - The specific subject for which the time table is about to be viewed.
 
-        standard - Specify class in Roman Numerals ranging from I to X.
+            STANDARD - Specify class in Roman Numerals ranging from I to X.
 
-        Note: 
-            If both `subject_name` and `standard` were not provided the help for `teacher` command will be executed.
+        Optional arguments:
+            - -help    - Displays the usage of the command
 
         """
 
@@ -161,41 +186,39 @@ class CLI:
 
         Usage:
 
-        tablebuddy admin  - -help
-            Displays the usage of the command
+            tablebuddy admin  - -help
+                    
+            tablebuddy admin - - generate
 
-        tablebuddy admin - - generate
-            Generates timetables for all the classes at once.
+            tablebuddy admin - - standard [standard]  - - section [section]
 
-        tablebuddy admin - - standard [standard]  - - section [section]
-            Displays the timetable of specified [standard] and [section] .
+            tablebuddy admin - - standard [standard]
 
-        [standard] - Specify class in Roman Numerals ranging from I to X.
-
-        [section] - Either 'A' or 'B'
-
-        tablebuddy admin - - standard [standard]
-
-        [standard] - Specify class in Roman Numerals ranging from I to X.
-
-        Note: 
-            Displays the timetable of both the sections when [section] is not provided. 
-            Displays the timetable for a particular section when both [standard] and [section] was provided.
-            If just `tablebuddy admin` was given , the help for `admin` command will be executed.
+        Optional arguments:
+            - - help       -  Displays the usage of the command
+            - - generate   - Generates timetables for all the classes at once
+            - - standard   -  Specify class in Roman Numerals ranging from I to X
+            - - section    -  Either 'A' or 'B'
 
         """
         print(self.admin_help.__doc__)
 
+    def roman_to_integer(roman):
+        romans=['I','II','III','IV','V','VI','VII','VIII','IX','X']
+        return dict(zip(romans, range(1,11))).get(roman)
+
 
 class ArgumentParser(argparse.ArgumentParser):
     def error(self, message):
-        if message.startswith("the following arguments are required"):
+        if message.startswith("the following arguments are required: user"):
             print(
                 CLI.student_help.__doc__,
                 CLI.teacher_help.__doc__,
                 CLI.admin_help.__doc__,
                 sep="\n<" + "-" * 100 + ">\n",
             )
+        elif message.startswith("the following arguments are required"):
+            print(message)
         else:
             print("error : " + message + "\n")
             self.print_help()
@@ -241,11 +264,11 @@ LOG.debug("Arguments passed %s" % args.__dict__)
 
 def convertToTeacherTimeTable(timetable, subject):
     """Convert the given timetable for the teacher's perspective."""
-    LOG.debug(timetable)
+    # LOG.debug(timetable)
     columns = ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6"]
     final = [["-"] * 7 for _ in DAYS]
     for index, row in enumerate(timetable):
-        print(index)
+        # print(index)
         final[DAYS.index(row["day"])][0] = row["day"]
         for col in columns:
             if row[col] == subject:
