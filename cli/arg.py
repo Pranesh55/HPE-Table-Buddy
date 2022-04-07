@@ -33,14 +33,12 @@ header_mapper = {
 }
 primary_subs_raw = ["English", "Language", "Maths", "Science", "Social Science"]
 secondary_subs_raw = [
+    "Language",
     "Physics",
     "Chemistry",
     "Biology",
-    "Algebra",
-    "Trignometry",
-    "Geometry",
+    "Maths",
     "History",
-    "Civics",
     "Geography"
 ]
 
@@ -75,7 +73,7 @@ class CLI:
             if args.user == "admin":
                 self.admin_help()
             
-
+    
     def student_std_section(self):
         self.admin_std_section()
 
